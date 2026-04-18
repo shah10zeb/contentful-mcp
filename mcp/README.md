@@ -74,7 +74,7 @@ Our project uses two main dependencies (defined in `pyproject.toml`):
 
 3. **Start the MCP Inspector (for tool testing):**
    ```bash
-   # Make sure you are in the contentful/mcp directory
+   # Make sure you are in the mcp directory
    # Export your variables, e.g., in PowerShell:
    # $env:CONTENTFUL_SPACE_ID="your_space"
    # $env:CONTENTFUL_MANAGEMENT_TOKEN="CFPAT-xxx"
@@ -97,7 +97,7 @@ Add the following under `mcpServers`:
       "args": [
         "run",
         "--directory",
-        "d:/SourceCode/contentful-mcp/contentful/mcp",
+        "d:/SourceCode/contentful-mcp/mcp",
         "main.py"
       ],
       "env": {
@@ -114,7 +114,7 @@ Add the following under `mcpServers`:
 1. Go to **Settings -> Features -> MCP**.
 2. Click **Add New MCP Server**.
 3. Make it a `command` type.
-4. Set the command to: `uv run --directory d:/SourceCode/contentful-mcp/contentful/mcp main.py`
+4. Set the command to: `uv run --directory d:/SourceCode/contentful-mcp/mcp main.py`
 5. Note: Cursor currently does not have a native way to inject env variables into the MCP command natively in the UI yet, so you may need to author a wrapper script `.bat` or `.sh` that first exports the variables, then calls `uv run main.py`.
 
 ## Available Tools

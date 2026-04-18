@@ -12,46 +12,25 @@ The purpose of this project is to allow LLMs (like Claude via Claude Desktop, or
 
 ### Sub-Projects
 
-- **`contentful/mcp/`**: A Python-based server implementing the official Anthropics MCP SDK. It uses the Contentful Management API (CMA) to read, draft, and publish items in your space.
-- **`contentful/webapp/`**: A lightweight Next.js 16 application that strips away standard boilerplate layouts and consumes HTML/CSS structured payloads directly via Contentful's GraphQL Delivery/Preview APIs. Features complete internationalized routing mapping (e.g. `domain/[lang]/[slug]`).
+- **`mcp/`**: A Python-based server implementing the official Anthropics MCP SDK. It uses the Contentful Management API (CMA) to read, draft, and publish items in your space.
+- **`webapp/`**: A lightweight Next.js 16 application that strips away standard boilerplate layouts and consumes HTML/CSS structured payloads directly via Contentful's GraphQL Delivery/Preview APIs. Features complete internationalized routing mapping (e.g. `domain/[lang]/[slug]`).
 
 ---
 
 ## 📐 System Architecture
 
-The following diagram illustrates how the components interact:
+The following outlines how the components interact in standard operations:
 
-```mermaid
-graph TD
-    classDef aiClient fill:#eef2ff,stroke:#6366f1,stroke-width:2px;
-    classDef repo fill:#fffbeb,stroke:#fbbf24,stroke-width:2px;
-    classDef contentful fill:#f0fdf4,stroke:#22c55e,stroke-width:2px;
-    classDef userBrowser fill:#faf5ff,stroke:#a855f7,stroke-width:2px;
+**1. AI Client Ecosystem**
+- **LLM Context (Claude Desktop / Cursor):** The user instructs the AI via a prompt (e.g. "Create a landing page"). The AI communicates directly with the Python-based MCP server via standard over-the-wire Model Context Protocol (stdio).
 
-    subgraph AI Client Ecosystem
-        LLM[LLM Context<br>Claude Desktop / Cursor]:::aiClient
-    end
+**2. Monorepo Services & Contentful Hooks**
+- **MCP Server (Python/FastMCP):** Acts as the bridge. It receives the layout and text requests from the AI, translates them, and posts them directly into the **Contentful Management API (CMA)** as draft entries.
+- **Contentful Cloud:** Internally synchronizes the new draft data between the Management API (CMA) and the Delivery/Preview API (CDA) so it's instantly available globally.
 
-    subgraph Monorepo Services
-        MCP[MCP Server<br>Python / FastMCP]:::repo
-        NextWebApp[Next.js App Router<br>React]:::repo
-    end
-
-    subgraph Contentful Cloud
-        CMA[(Content Management API<br>REST POST/PUT)]:::contentful
-        CDA[(Content Delivery/Preview API<br>GraphQL)]:::contentful
-    end
-
-    Browser((User Browser)):::userBrowser
-
-    %% Relationships
-    LLM <-->|Model Context Protocol via stdio| MCP
-    MCP -->|Draft & Publish Landing Pages| CMA
-    CMA ..->|Internal Sync| CDA
-    
-    Browser -->|Visits: /en/[slug]?preview=true| NextWebApp
-    NextWebApp -->|Fetches exact HTML/CSS payloads| CDA
-```
+**3. Preview & Presentation**
+- **User Browser:** The MCP server computes and prints out a local preview link (e.g., `?preview=true`), which the developer clicks.
+- **Next.js WebApp (React/App Router):** The lightweight frontend detects the user's route, executes a cache-busted GraphQL request to the **Contentful Delivery/Preview API (CDA)**, pulling exactly the HTML and CSS payloads the AI drafted, and presents it to the user.
 
 ---
 
@@ -71,16 +50,16 @@ To get the ecosystem running simultaneously:
 ### 1. Set Up the Webapp
 Navigate to the Webapp directory, configure your `.env.local` keys, and run the developer server.
 ```bash
-cd contentful/webapp
+cd webapp
 npm install
 npm run dev
 ```
-*(For detailed setup, see `contentful/webapp/README.md`)*
+*(For detailed setup, see `webapp/README.md`)*
 
 ### 2. Set Up the MCP Server
 Navigate to the MCP directory, sync Python dependencies, and attach it to your client (Claude or Cursor).
 ```bash
-cd contentful/mcp
+cd mcp
 uv sync
 ```
-*(For full instructions on attaching to Claude/Cursor or testing locally via Inspector, see `contentful/mcp/README.md`)*
+*(For full instructions on attaching to Claude/Cursor or testing locally via Inspector, see `mcp/README.md`)*
